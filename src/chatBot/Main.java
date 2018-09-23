@@ -14,7 +14,8 @@ public class Main {
 			else if (userMessage == question.getAnswer())
 				IOConsole.sendBotMessages(new String[] { "Правильный ответ!" , ""});
 			else
-				IOConsole.sendBotMessages(new String[] { "Неправильный ответ!" , ""});
+				IOConsole.sendBotMessages(new String[] { "Неправильный ответ! Правильный ответ: " + 
+														 question.getAnswer(), ""});
 		}
 		IOConsole.closeScanner();
 	}

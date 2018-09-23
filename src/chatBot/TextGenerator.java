@@ -42,21 +42,21 @@ public class TextGenerator
 	
 	public static QuestionAnswer getQuestion() 
 	{
-		var number = rnd.nextInt(listQuestionsAbout.length);
+		int number = rnd.nextInt(listQuestionsAbout.length);
 		
 		String information;
-		var questionAboutDate = rnd.nextBoolean();
+		boolean questionAboutDate = rnd.nextBoolean();
 		
 		if (questionAboutDate)
 			information = getBornInformation(listQuestionsAbout[number]);
 		else information = getPlaceBornInformation(listQuestionsAbout[number]);
 		
-		var person = listQuestionsAbout[number].replaceAll("_", " ");
-		var question = "Напишите дату рождения человека, известного как " + person;
+		String person = listQuestionsAbout[number].replaceAll("_", " ");
+		String question = "Напишите дату рождения человека, известного как " + person;
 		
 		if (!questionAboutDate)
 			question = "Напишите город, где родился " + person;
-		var questionAnswer = new QuestionAnswer(question, information);
+		QuestionAnswer questionAnswer = new QuestionAnswer(question, information);
 		return questionAnswer;
 	}
 	
@@ -64,10 +64,10 @@ public class TextGenerator
 	{
 		try 
 		{
-			var web_site = "https://ru.wikipedia.org/wiki/" + page;
-			var url = new URL(web_site);
-			var reader = new LineNumberReader(new InputStreamReader(url.openStream(), "UTF-8"));
-			var line = reader.readLine();
+			String web_site = "https://ru.wikipedia.org/wiki/" + page;
+			URL url = new URL(web_site);
+			LineNumberReader reader = new LineNumberReader(new InputStreamReader(url.openStream(), "UTF-8"));
+			String line = reader.readLine();
 			
 			while (line != null)
 			{
@@ -81,11 +81,11 @@ public class TextGenerator
 				line = reader.readLine();
 			}
 		
-		var helperIndex = line.indexOf("title");
-		var firstIndex = line.indexOf(">", helperIndex);
-		var secondIndex = line.indexOf("</a>", firstIndex);
-		var thirdIndex = line.indexOf("год");
-		var information = line.substring(firstIndex+1, secondIndex) + " " + 
+		int helperIndex = line.indexOf("title");
+		int firstIndex = line.indexOf(">", helperIndex);
+		int secondIndex = line.indexOf("</a>", firstIndex);
+	    int thirdIndex = line.indexOf("год");
+		String information = line.substring(firstIndex+1, secondIndex) + " " + 
 					line.substring(thirdIndex+5, thirdIndex + 9);
 		reader.close();
 		information = getFormat(information);
@@ -98,8 +98,8 @@ public class TextGenerator
 	
 	private static String getFormat(String information)
 	{
-		var text = information.split(" ");
-		var mounth = "";
+		String[] text = information.split(" ");
+		String mounth = "";
 		if (text[1].compareTo("января") == 0) mounth = ".01.";
 		else if (text[1].compareTo("февраля") == 0) mounth = ".02.";
 		else if (text[1].compareTo("марта") == 0) mounth = ".03.";
@@ -114,7 +114,7 @@ public class TextGenerator
 		else mounth = ".12.";
 		if (text[0].length() == 1)
 			text[0] = "0" + text[0];
-		var formatedinformation = text[0] + mounth + text[2];
+		String formatedinformation = text[0] + mounth + text[2];
 		return formatedinformation;
 	}
 	
@@ -122,10 +122,10 @@ public class TextGenerator
 	{
 		try 
 		{
-			var web_site = "https://ru.wikipedia.org/wiki/" + page;
-			var url = new URL(web_site);
-			var reader = new LineNumberReader(new InputStreamReader(url.openStream(), "UTF-8"));
-			var line = reader.readLine();
+			String web_site = "https://ru.wikipedia.org/wiki/" + page;
+			URL url = new URL(web_site);
+			LineNumberReader reader = new LineNumberReader(new InputStreamReader(url.openStream(), "UTF-8"));
+			String line = reader.readLine();
 			
 			while (line != null)
 			{
@@ -139,10 +139,10 @@ public class TextGenerator
 				line = reader.readLine();
 			}
 		
-		var helperIndex = line.indexOf("title");
-		var firstIndex = line.indexOf(">", helperIndex);
-		var secondIndex = line.indexOf("</a>", firstIndex);
-		var information = line.substring(firstIndex+1, secondIndex);
+		int helperIndex = line.indexOf("title");
+		int firstIndex = line.indexOf(">", helperIndex);
+		int secondIndex = line.indexOf("</a>", firstIndex);
+		String information = line.substring(firstIndex+1, secondIndex);
 		reader.close();
 		return information;
 		} 

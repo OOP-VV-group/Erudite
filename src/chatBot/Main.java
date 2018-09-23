@@ -9,7 +9,7 @@ public class Main {
 			IOConsole.sendBotMessages(new String[] { question.getQuestion() });
 			
 			var userMessage = IOConsole.collectUserMessage();
-			if (userMessage == "quit")
+			if (userMessage.equals("quit"))
 				break;
 			else if (userMessage == question.getAnswer())
 				IOConsole.sendBotMessages(new String[] { "Правильный ответ!" , ""});

@@ -21,7 +21,7 @@ public class Main {
 			
 			if (userMessage.equals("quit"))
 				break;
-			else if (userMessage == question.getAnswer())
+			else if (userMessage.equals(question.getAnswer()))
 				IOConsole.sendBotMessages(new String[] { "Правильный ответ!" , ""});
 			else
 				IOConsole.sendBotMessages(new String[] { "Неправильный ответ! Правильный ответ: " +

@@ -1,19 +1,22 @@
 package chatBot;
 
+
 public class Main {
 	
-	private class Request {
-		String[] messages;
-		int idOfIOModule;
-		}
-	
 	public static void main(String[] args) throws Exception {
-		IOConsole consoleIO = new IOConsole(); // Пока что один экземпляр класса для 
-										 	   // ввода-вывода сообщений
 		while (true) {
+			var question = TextGenerator.getQuestion();
+			IOConsole.sendBotMessages(new String[] { question.getQuestion() });
 			
+			var userMessage = IOConsole.collectUserMessage();
+			if (userMessage == "quit")
+				break;
+			else if (userMessage == question.getAnswer())
+				IOConsole.sendBotMessages(new String[] { "РџСЂР°РІРёР»СЊРЅС‹Р№ РѕС‚РІРµС‚!" , ""});
+			else
+				IOConsole.sendBotMessages(new String[] { "РќРµРїСЂР°РІРёР»СЊРЅС‹Р№ РѕС‚РІРµС‚!" , ""});
 		}
-
+		IOConsole.closeScanner();
 	}
 
 }

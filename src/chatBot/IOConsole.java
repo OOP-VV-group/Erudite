@@ -1,24 +1,21 @@
 package chatBot;
 
-public class IOConsole implements IOModule{
-	static int idCounter = 0;
-	int id;
+import java.util.Scanner;
+
+public final class IOConsole {
+	private static Scanner scanner = new Scanner(System.in);
 	
-	IOConsole() {
-		this.id = IOConsole.idCounter++;
-	}
-	
-	public int getId() {
-		return this.id;
+	public static void closeScanner() {
+		scanner.close();
 	}
 
-	public void sendBotMessages(String[] messages) {
+	public static void sendBotMessages(String[] messages) {
 		for (String message : messages)
-			System.out.println(message);
+			System.out.println(message);	
 	}
 
-	public String[] collectUserMessages() { // WIP
-		return new String[] {}; 
+	public static String collectUserMessage() {
+		return scanner.nextLine();
 	}
 	
 }

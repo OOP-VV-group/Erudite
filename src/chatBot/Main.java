@@ -1,14 +1,15 @@
 package chatBot;
 
-
 public class Main {
 	
 	public static void main(String[] args) throws Exception {
+		IOConsole.openScanner();
 		IOConsole.sendBotMessages(new String[] { TextGenerator.getHelp(), 
 				"Команды: ",
 				"    help - вывести справку",
 				"    quit - закончить сессию",
-				""});	
+				""});
+		
 		while (true) {
 			var question = TextGenerator.getQuestion();
 			IOConsole.sendBotMessages(new String[] { question.getQuestion() });
@@ -25,7 +26,7 @@ public class Main {
 				IOConsole.sendBotMessages(new String[] { "Правильный ответ!" , ""});
 			else
 				IOConsole.sendBotMessages(new String[] { "Неправильный ответ! Правильный ответ: " +
-						question.getAnswer(), ""});
+						question.getAnswer(), ""}); 
 		}
 		IOConsole.closeScanner();
 	}

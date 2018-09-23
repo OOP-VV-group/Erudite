@@ -26,17 +26,17 @@ public class TextGenerator
 		}
 	}
 	
-	private static String help = "Привет! Мы тут задаём вопросы о знаменитостях."
-			+ "Все даты записывай в формате ДД.ММ.ГГГГ";
+	private static String help = "РџСЂРёРІРµС‚! РњС‹ С‚СѓС‚ Р·Р°РґР°С‘Рј РІРѕРїСЂРѕСЃС‹ Рѕ Р·РЅР°РјРµРЅРёС‚РѕСЃС‚СЏС…."
+			+ "Р’СЃРµ РґР°С‚С‹ Р·Р°РїРёСЃС‹РІР°Р№ РІ С„РѕСЂРјР°С‚Рµ Р”Р”.РњРњ.Р“Р“Р“Р“";
 	
 	public static String getHelp()
 	{
 		return help;
 	}
 	
-	private static String[] listQuestionsAbout = {"Фредди_Меркьюри", "Эминем",
-		"Высоцкий,_Владимир_Семёнович", "Форд,_Генри", "Джобс,_Стив", "Гейтс,_Билл",
-		"Маккартни,_Пол"};
+	private static String[] listQuestionsAbout = {"Р¤СЂРµРґРґРё_РњРµСЂРєСЊСЋСЂРё", "Р­РјРёРЅРµРј",
+		"Р’С‹СЃРѕС†РєРёР№,_Р’Р»Р°РґРёРјРёСЂ_РЎРµРјС‘РЅРѕРІРёС‡", "Р¤РѕСЂРґ,_Р“РµРЅСЂРё", "Р”Р¶РѕР±СЃ,_РЎС‚РёРІ", "Р“РµР№С‚СЃ,_Р‘РёР»Р»",
+		"РњР°РєРєР°СЂС‚РЅРё,_РџРѕР»"};
 	
 	private static Random rnd = new Random();
 	
@@ -52,10 +52,10 @@ public class TextGenerator
 		else information = getPlaceBornInformation(listQuestionsAbout[number]);
 		
 		var person = listQuestionsAbout[number].replaceAll("_", " ");
-		var question = "Напишите дату рождения человека, известного как " + person;
+		var question = "РќР°РїРёС€РёС‚Рµ РґР°С‚Сѓ СЂРѕР¶РґРµРЅРёСЏ С‡РµР»РѕРІРµРєР°, РёР·РІРµСЃС‚РЅРѕРіРѕ РєР°Рє " + person;
 		
 		if (!questionAboutDate)
-			question = "Напишите город, где родился " + person;
+			question = "РќР°РїРёС€РёС‚Рµ РіРѕСЂРѕРґ, РіРґРµ СЂРѕРґРёР»СЃСЏ " + person;
 		var questionAnswer = new QuestionAnswer(question, information);
 		return questionAnswer;
 	}
@@ -71,8 +71,8 @@ public class TextGenerator
 			
 			while (line != null)
 			{
-				if (line.contains("Дата&#160;рождения") || line.contains("Дата рождения")
-						|| line.contains("Рождение"))
+				if (line.contains("Р”Р°С‚Р°&#160;СЂРѕР¶РґРµРЅРёСЏ") || line.contains("Р”Р°С‚Р° СЂРѕР¶РґРµРЅРёСЏ")
+						|| line.contains("Р РѕР¶РґРµРЅРёРµ"))
 				{
 					while(!line.contains("title"))
 						line = reader.readLine();
@@ -84,7 +84,7 @@ public class TextGenerator
 		var helperIndex = line.indexOf("title");
 		var firstIndex = line.indexOf(">", helperIndex);
 		var secondIndex = line.indexOf("</a>", firstIndex);
-		var thirdIndex = line.indexOf("год");
+		var thirdIndex = line.indexOf("РіРѕРґ");
 		var information = line.substring(firstIndex+1, secondIndex) + " " + 
 					line.substring(thirdIndex+5, thirdIndex + 9);
 		reader.close();
@@ -100,17 +100,17 @@ public class TextGenerator
 	{
 		var text = information.split(" ");
 		var mounth = "";
-		if (text[1].compareTo("января") == 0) mounth = ".01.";
-		else if (text[1].compareTo("февраля") == 0) mounth = ".02.";
-		else if (text[1].compareTo("марта") == 0) mounth = ".03.";
-		else if (text[1].compareTo("апреля") == 0) mounth = ".04.";
-		else if (text[1].compareTo("мая") == 0) mounth = ".05.";
-		else if (text[1].compareTo("июня") == 0) mounth = ".06.";
-		else if (text[1].compareTo("июля") == 0) mounth = ".07.";
-		else if (text[1].compareTo("августа") == 0) mounth = ".08.";
-		else if (text[1].compareTo("сентября") == 0) mounth = ".09.";
-		else if (text[1].compareTo("октября") == 0) mounth = ".10.";
-		else if (text[1].compareTo("ноября") == 0) mounth = ".11.";
+		if (text[1].compareTo("СЏРЅРІР°СЂСЏ") == 0) mounth = ".01.";
+		else if (text[1].compareTo("С„РµРІСЂР°Р»СЏ") == 0) mounth = ".02.";
+		else if (text[1].compareTo("РјР°СЂС‚Р°") == 0) mounth = ".03.";
+		else if (text[1].compareTo("Р°РїСЂРµР»СЏ") == 0) mounth = ".04.";
+		else if (text[1].compareTo("РјР°СЏ") == 0) mounth = ".05.";
+		else if (text[1].compareTo("РёСЋРЅСЏ") == 0) mounth = ".06.";
+		else if (text[1].compareTo("РёСЋР»СЏ") == 0) mounth = ".07.";
+		else if (text[1].compareTo("Р°РІРіСѓСЃС‚Р°") == 0) mounth = ".08.";
+		else if (text[1].compareTo("СЃРµРЅС‚СЏР±СЂСЏ") == 0) mounth = ".09.";
+		else if (text[1].compareTo("РѕРєС‚СЏР±СЂСЏ") == 0) mounth = ".10.";
+		else if (text[1].compareTo("РЅРѕСЏР±СЂСЏ") == 0) mounth = ".11.";
 		else mounth = ".12.";
 		if (text[0].length() == 1)
 			text[0] = "0" + text[0];
@@ -129,8 +129,8 @@ public class TextGenerator
 			
 			while (line != null)
 			{
-				if (line.contains("Место&#160;рождения")
-						|| line.contains("Место рождения"))
+				if (line.contains("РњРµСЃС‚Рѕ&#160;СЂРѕР¶РґРµРЅРёСЏ")
+						|| line.contains("РњРµСЃС‚Рѕ СЂРѕР¶РґРµРЅРёСЏ"))
 				{
 					while(!line.contains("title"))
 						line = reader.readLine();
@@ -145,7 +145,7 @@ public class TextGenerator
 		var information = line.substring(firstIndex+1, secondIndex);
 		reader.close();
 		return information;
-		}
+		} 
 		catch(Exception ex) {
 			return null;
 		}

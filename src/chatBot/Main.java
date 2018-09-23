@@ -7,12 +7,13 @@ public class Main {
 		int idOfIOModule;
 		}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		IOConsole consoleIO = new IOConsole(); // Пока что один экземпляр класса для 
 										 	   // ввода-вывода сообщений
 		while (true) {
 			
 		}
+
 	}
 
 }

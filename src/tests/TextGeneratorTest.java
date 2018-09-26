@@ -120,4 +120,11 @@ public class TextGeneratorTest {
 		assertTrue(result);
 	}
 	
+	@Test
+	public void testGetQuestion_six()
+	{
+		var result = testGetQuestion();
+		assertTrue(result);
+	}
+	
 }

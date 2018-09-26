@@ -36,7 +36,7 @@ public class TextGenerator
 	
 	private static String[] listQuestionsAbout = {"Фредди_Меркьюри", "Эминем",
 		"Высоцкий,_Владимир_Семёнович", "Форд,_Генри", "Джобс,_Стив", "Гейтс,_Билл",
-		"Маккартни,_Пол"};
+		"Маккартни,_Пол", "Бунин,_Иван_Алексеевич", "Асанов,_Магаз_Оразкимович"};
 	
 	private static Random rnd = new Random();
 	
@@ -47,9 +47,7 @@ public class TextGenerator
 		String information;
 		boolean questionAboutDate = rnd.nextBoolean();
 		
-		if (questionAboutDate)
-			information = getBornInformation(listQuestionsAbout[number]);
-		else information = getPlaceBornInformation(listQuestionsAbout[number]);
+			information = getBornInformation(listQuestionsAbout[number], questionAboutDate);
 		
 		String person = listQuestionsAbout[number].replaceAll("_", " ");
 		String question = "Напишите дату рождения человека, известного как " + person;
@@ -60,7 +58,7 @@ public class TextGenerator
 		return questionAnswer;
 	}
 	
-	private static String getBornInformation(String page)
+	private static String getBornInformation(String page, boolean aboutDate)
 	{
 		try 
 		{
@@ -68,11 +66,22 @@ public class TextGenerator
 			URL url = new URL(web_site);
 			LineNumberReader reader = new LineNumberReader(new InputStreamReader(url.openStream(), "UTF-8"));
 			String line = reader.readLine();
+			String firstSearchedWord;
+			String secondSearchedWord;
+			if (aboutDate)
+			{
+				firstSearchedWord = "Дата&#160;рождения";
+				secondSearchedWord = "Дата рождения";
+			}
+			else
+			{
+				firstSearchedWord = "Место&#160;рождения";
+				secondSearchedWord = "Место рождения";
+			}
 			
 			while (line != null)
 			{
-				if (line.contains("Дата&#160;рождения") || line.contains("Дата рождения")
-						|| line.contains("Рождение"))
+				if (line.contains(firstSearchedWord) || line.contains(secondSearchedWord))
 				{
 					while(!line.contains("title"))
 						line = reader.readLine();
@@ -85,10 +94,16 @@ public class TextGenerator
 		int firstIndex = line.indexOf(">", helperIndex);
 		int secondIndex = line.indexOf("</a>", firstIndex);
 	    int thirdIndex = line.indexOf("год");
-		String information = line.substring(firstIndex+1, secondIndex) + " " + 
-					line.substring(thirdIndex+5, thirdIndex + 9);
+	    String information;
+	    if (aboutDate)
+	    {
+	    	information = line.substring(firstIndex+1, secondIndex) + " " + 
+						line.substring(thirdIndex+5, thirdIndex + 9);
+			information = getFormat(information);
+	    }
+	    else
+			information = line.substring(firstIndex+1, secondIndex);
 		reader.close();
-		information = getFormat(information);
 		return information;
 		}
 		catch(Exception ex) {

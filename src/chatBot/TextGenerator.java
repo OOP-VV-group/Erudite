@@ -133,37 +133,4 @@ public class TextGenerator
 		return formatedinformation;
 	}
 	
-	private static String getPlaceBornInformation(String page)
-	{
-		try 
-		{
-			String web_site = "https://ru.wikipedia.org/wiki/" + page;
-			URL url = new URL(web_site);
-			LineNumberReader reader = new LineNumberReader(new InputStreamReader(url.openStream(), "UTF-8"));
-			String line = reader.readLine();
-			
-			while (line != null)
-			{
-				if (line.contains("Место&#160;рождения")
-						|| line.contains("Место рождения"))
-				{
-					while(!line.contains("title"))
-						line = reader.readLine();
-					break;
-				}
-				line = reader.readLine();
-			}
-		
-		int helperIndex = line.indexOf("title");
-		int firstIndex = line.indexOf(">", helperIndex);
-		int secondIndex = line.indexOf("</a>", firstIndex);
-		String information = line.substring(firstIndex+1, secondIndex);
-		reader.close();
-		return information;
-		} 
-		catch(Exception ex) {
-			return null;
-		}
-	}
-	
 }

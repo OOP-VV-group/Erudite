@@ -2,24 +2,24 @@ package chatBot;
 
 import java.util.Scanner;
 
-public final class IOConsole {
+public class IOConsole implements IOModule{
 	private static Scanner scanner;
 	
-	public static void closeScanner() {
+	public void closeIO() {
 		scanner.close();
 	}
 	
-	public static void openScanner() {
+	public void openIO() {
 		IOConsole.scanner = new Scanner(System.in);
 	}
 	
-	public static void sendBotMessages(String[] messages) {
+	public void sendBotMessages(String[] messages) {
 		for (String message : messages)
 			System.out.println(message);	
 	}
 
-	public static String collectUserMessage() {
-		return scanner.nextLine();
+	public String[] collectUserMessages() {
+		return new String[] { scanner.nextLine() };
 	}
 	
 }

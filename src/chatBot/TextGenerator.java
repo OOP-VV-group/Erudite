@@ -1,12 +1,17 @@
 package chatBot;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.net.*;
 import java.io.*;
 
-public class TextGenerator
+public enum TextGenerator
 {
-	public static class QuestionAnswer
+	INSTANCE;
+
+	public class QuestionAnswer
 	{
 		private String question;
 		private String answer;
@@ -26,21 +31,25 @@ public class TextGenerator
 		}
 	}
 	
-	private static String help = "Привет! Мы тут задаём вопросы о знаменитостях."
+	private Map<Integer, HashSet<QuestionAnswer>> idQuestion =
+			new HashMap<Integer, HashSet<QuestionAnswer>>();
+	
+	
+	private String help = "Привет! Мы тут задаём вопросы о знаменитостях."
 			+ "Все даты записывай в формате ДД.ММ.ГГГГ";
 	
-	public static String getHelp()
+	public String getHelp()
 	{
 		return help;
 	}
 	
-	private static String[] listQuestionsAbout = {"Фредди_Меркьюри", "Эминем",
+	private String[] listQuestionsAbout = {"Фредди_Меркьюри", "Эминем",
 		"Высоцкий,_Владимир_Семёнович", "Форд,_Генри", "Джобс,_Стив", "Гейтс,_Билл",
 		"Маккартни,_Пол", "Бунин,_Иван_Алексеевич", "Асанов,_Магаз_Оразкимович"};
 	
-	private static Random rnd = new Random();
+	private Random rnd = new Random();
 	
-	public static QuestionAnswer getQuestion() 
+	public QuestionAnswer getQuestion(int id) 
 	{
 		int number = rnd.nextInt(listQuestionsAbout.length);
 		
@@ -55,10 +64,44 @@ public class TextGenerator
 		if (!questionAboutDate)
 			question = "Напишите город, где родился " + person;
 		QuestionAnswer questionAnswer = new QuestionAnswer(question, information);
+		var isUsedQuestion = false;
+		var isNewKey = true;
+		
+		wasQuestion: for (int key : idQuestion.keySet())
+		{
+			if (key == id)
+			{
+				isNewKey = false;
+				var questions = idQuestion.get(id);
+				for (QuestionAnswer qa : questions)
+					if (qa.question.equals(questionAnswer.question)) 
+					{
+						isUsedQuestion = true;
+						break wasQuestion;
+					}
+			}
+		}
+		if (isUsedQuestion)
+			questionAnswer = getQuestion(id);
+		if (isNewKey)
+		{
+			var questions = new HashSet<QuestionAnswer>();
+			questions.add(questionAnswer);
+			idQuestion.put(id, questions);
+		}
+		else
+		{
+			var questions = idQuestion.get(id);
+			questions.add(questionAnswer);
+			idQuestion.put(id, questions);
+		}
+		if (idQuestion.size() >= listQuestionsAbout.length * 2)
+			idQuestion.clear();
+		
 		return questionAnswer;
 	}
 	
-	private static String getBornInformation(String page, boolean aboutDate)
+	private String getBornInformation(String page, boolean aboutDate)
 	{
 		try 
 		{
@@ -111,7 +154,7 @@ public class TextGenerator
 		}
 	}
 	
-	private static String getFormat(String information)
+	private String getFormat(String information)
 	{
 		String[] text = information.split(" ");
 		String mounth = "";

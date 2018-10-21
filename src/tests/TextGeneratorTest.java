@@ -6,25 +6,31 @@ import static org.junit.Assert.*;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.net.URL;
+import java.util.HashSet;
 
 import org.junit.Test;
 
-public class TextGeneratorTest {
+public class TextGeneratorTest
+{
+	private TextGenerator tg = TextGenerator.INSTANCE;
 
 	@Test
 	public void testGetHelp()
 	{
-		var help = TextGenerator.getHelp();
+		var help = tg.getHelp();
 		assertEquals(help, "Привет! Мы тут задаём вопросы о знаменитостях."
 				+ "Все даты записывай в формате ДД.ММ.ГГГГ");
 	} 
 	
+	private HashSet<String> questionsForId2 = new HashSet<String>();
 	
-	public boolean testGetQuestion() 
+	public boolean testGetQuestion(int id) 
 	{
-		var pair = TextGenerator.getQuestion();
+		var pair = tg.getQuestion(id);
 		String answer = pair.getAnswer();
 		String question = pair.getQuestion();
+		if (id == 2)
+			questionsForId2.add(question);
 		String result;
 		String person;
 		if (question.contains("Напишите дату рождения"))
@@ -88,43 +94,51 @@ public class TextGeneratorTest {
 	@Test
 	public void testGetQuestion_one()
 	{
-		var result = testGetQuestion();
+		var result = testGetQuestion(1);
 		assertTrue(result);
 	}
 	
 	@Test
 	public void testGetQuestion_two()
 	{
-		var result = testGetQuestion();
+		var result = testGetQuestion(2);
 		assertTrue(result);
 	}
 	
 	@Test
 	public void testGetQuestion_three()
 	{
-		var result = testGetQuestion();
+		var result = testGetQuestion(3);
 		assertTrue(result);
 	}
 	
 	@Test
 	public void testGetQuestion_four()
 	{
-		var result = testGetQuestion();
+		var result = testGetQuestion(4);
 		assertTrue(result);
 	}
 	
 	@Test
 	public void testGetQuestion_five()
 	{
-		var result = testGetQuestion();
+		var result = testGetQuestion(5);
 		assertTrue(result);
 	}
 	
 	@Test
 	public void testGetQuestion_six()
 	{
-		var result = testGetQuestion();
-		assertTrue(result);
+		var result1 = testGetQuestion(2);
+		var result2 = testGetQuestion(2);
+		var result3 = testGetQuestion(2);
+		var result4 = testGetQuestion(2);
+		var result5 = testGetQuestion(2);
+		var questions = questionsForId2.toArray();
+		var result6 = questions[0] != questions[1] && questions[1] != questions[2] &&
+				questions[2] != questions[3] && questions[3] != questions[4];
+
+		assertTrue(result1);
+		assertTrue(result6);
 	}
-	
 }

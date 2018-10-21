@@ -2,6 +2,7 @@ package starters;
 
 public class VkontakteStarter {
 
-	// Класс на данный момент не имплеменитрован
-	
+	public static void main(String[] args) {
+		throw new RuntimeException("Not implemented yet!"); 
+	}
 }

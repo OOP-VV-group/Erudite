@@ -1,18 +1,17 @@
 package tests;
 
 import chatBot.Erudite;
-import chatBot.IOConsole;
 import chatBot.TextGenerator;
 
 import org.junit.Test;
 import org.junit.After;
 import org.junit.Before;
-import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.io.IOException;
 
 
@@ -26,41 +25,59 @@ public class EruditeConsoleTest {
 	    System.setOut(new PrintStream(outContent));
 	}
 	
-	public void testQuestioning(
-			String input, 
-			String output, 
-			int questionsCount,
-			int skippedOutputSymbolsCount) throws Exception {
-		var inputBuffer = input.getBytes("UTF-8");
+	private void sendMessageToConsole(String message) 
+			throws UnsupportedEncodingException {
+		var inputBuffer = message.getBytes("UTF-8");
 		final ByteArrayInputStream inContent = new ByteArrayInputStream(inputBuffer);
 		System.setIn(inContent); 
-		
-		var erudite = new Erudite(new IOConsole());
-		try {
-			for (int i = 0; i < questionsCount; i++)
-				erudite.askQuestion();
-		}
-		catch (IOException exceptionIO) {
-			assertTrue(exceptionIO.getMessage().equals("Пользователь закончил диалог"));
-		}
-		
-		assertTrue(
-				outContent
-					.toString()
-					.substring(skippedOutputSymbolsCount)
-					.contains(output));
-		
-		erudite.closeIO();
 	}
 	
 	@Test
 	public void testIncorrectAnswer() throws Exception {
-		testQuestioning("123\nquit\n", "Неправильный ответ!", 2, 0);
+		try { this.sendMessageToConsole("123\nquit\n"); }
+		catch (UnsupportedEncodingException exception) {
+			assert false : "Message to console is given with wrong encoding";
+		}
+		
+		var erudite = new Erudite();
+		String[][] botReplies = new String[][] {{}, {}};
+		try {
+			for (int i = 0; i < 2; i++)
+				botReplies[0] = erudite.askQuestion(0);
+		}
+		catch (IOException exceptionIO) {
+			assert exceptionIO.getMessage().equals("Пользователь закончил диалог");
+		}
+		
+		assert botReplies[0][0].startsWith("Неправильный ответ");
+		
+		erudite.closeIO(0);
 	}
 	
 	@Test
-	public void testHelp() throws Exception {
-		testQuestioning("help\nquit\n", TextGenerator.getHelp(), 2, 1);
+	public void testCorrectAnswer() {
+		var textGenerator = TextGenerator.INSTANCE;
+		var question = textGenerator.getQuestion(0);
+		try { 
+			this.sendMessageToConsole(question.getAnswer() + "\nquit\n"); 
+		}
+		catch (UnsupportedEncodingException exception) {
+			assert false : "Message to console is given with wrong encoding";
+		}
+		
+		var erudite = new Erudite();
+		String[][] botReplies = new String[][] {{}, {}};
+		try {
+			for (int i = 0; i < 2; i++)
+				botReplies[i] = erudite.askQuestion(0, question);
+		}
+		catch (IOException exceptionIO) {
+			assert exceptionIO.getMessage().equals("Пользователь закончил диалог");
+		}
+		
+		assert botReplies[0][0].startsWith("Правильный ответ");
+		
+		erudite.closeIO(0);
 	}
 	
 	@After

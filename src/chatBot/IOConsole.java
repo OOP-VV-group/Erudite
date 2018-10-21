@@ -2,15 +2,22 @@ package chatBot;
 
 import java.util.Scanner;
 
-public class IOConsole implements IOModule{
-	private static Scanner scanner;
+public enum IOConsole implements IOModule{
+	INSTANCE;
+	
+	private Scanner scanner;
+	private int id = 0;
 	
 	public void closeIO() {
-		scanner.close();
+		this.scanner.close();
 	}
 	
 	public void openIO() {
-		IOConsole.scanner = new Scanner(System.in);
+		this.scanner = new Scanner(System.in);
+	}
+	
+	public int getId() {
+		return this.id;
 	}
 	
 	public void sendBotMessages(String[] messages) {
@@ -19,7 +26,7 @@ public class IOConsole implements IOModule{
 	}
 
 	public String[] collectUserMessages() {
-		return new String[] { scanner.nextLine() };
+		return new String[] { this.scanner.nextLine() };
 	}
 	
 }

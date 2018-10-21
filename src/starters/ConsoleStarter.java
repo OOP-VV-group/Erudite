@@ -8,12 +8,11 @@ import chatBot.IOConsole;
 public class ConsoleStarter {
 
 	public static void main(String[] args) {
-		var erudite = new Erudite(new IOConsole());
-		erudite.sendStartMessage();
+		var erudite = new Erudite();
 		
 		while (true) {
 			try {
-				erudite.askQuestion();
+				erudite.askQuestion(0);
 			}
 			catch (IOException exceptionIO) {
 				break;

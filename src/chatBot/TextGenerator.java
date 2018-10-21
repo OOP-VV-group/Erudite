@@ -45,7 +45,7 @@ public enum TextGenerator
 	
 	private String[] listQuestionsAbout = {"Фредди_Меркьюри", "Эминем",
 		"Высоцкий,_Владимир_Семёнович", "Форд,_Генри", "Джобс,_Стив", "Гейтс,_Билл",
-		"Маккартни,_Пол", "Бунин,_Иван_Алексеевич", "Асанов,_Магаз_Оразкимович"};
+		"Маккартни,_Пол", "Асанов,_Магаз_Оразкимович"};
 	
 	private Random rnd = new Random();
 	
@@ -95,8 +95,12 @@ public enum TextGenerator
 			questions.add(questionAnswer);
 			idQuestion.put(id, questions);
 		}
-		if (idQuestion.size() >= listQuestionsAbout.length * 2)
-			idQuestion.clear();
+		var questions = idQuestion.get(id); 
+		if (questions.size() >= listQuestionsAbout.length * 2)
+		{
+			questions.clear();
+			idQuestion.put(id, questions);
+		}
 		
 		return questionAnswer;
 	}

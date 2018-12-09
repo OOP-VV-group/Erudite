@@ -1,144 +1,143 @@
-//package tests;
-//
-//import chatBot.TextGenerator;
-//import static org.junit.Assert.*;
-//
-//import java.io.InputStreamReader;
-//import java.io.LineNumberReader;
-//import java.net.URL;
-//import java.util.HashSet;
-//
-//import org.junit.Test;
-//
-//public class TextGeneratorTest
-//{
-//	private TextGenerator tg = TextGenerator.INSTANCE;
-//
-//	@Test
-//	public void testGetHelp()
-//	{
-//		var help = tg.getHelp();
-//		assertEquals(help, "Привет! Мы тут задаём вопросы о знаменитостях."
-//				+ "Все даты записывай в формате ДД.ММ.ГГГГ");
-//	} 
-//	
-//	private HashSet<String> questionsForId2 = new HashSet<String>();
-//	
-//	public boolean testGetQuestion(int id) 
-//	{
-//		var pair = tg.getQuestion(id);
-//		String answer = pair.getAnswer();
-//		String question = pair.getQuestion();
-//		if (id == 2)
-//			questionsForId2.add(question);
-//		String result;
-//		String person;
-//		if (question.contains("Напишите дату рождения"))
-//		{
-//			result = helperForDate(answer);
-//			person = question.substring(48,  question.length());
-//		}
-//		else
-//		{
-//			result = answer;
-//			person = question.substring(28, question.length()).replace(" ", "_");
-//		}
-//		
-//		try
-//		{
-//			String web_site = "https://ru.wikipedia.org/wiki/" + person;
-//			URL url = new URL(web_site);
-//			LineNumberReader reader = new LineNumberReader(new InputStreamReader(url.openStream(), "UTF-8"));
-//			String line = reader.readLine();
-//			while(line != null)
-//			{
-//				if (line.contains(result))
-//					break;
-//				line = reader.readLine();
-//			}
-//			var isFound = (line != null);
-//			reader.close();
-//			return isFound;
-//		}
-//		catch(Exception ex)
-//		{
-//			return false;
-//		}
-//
-//	}
-//	
-//	public static String helperForDate(String answer)
-//	{
-//		var date = answer.substring(3, 5);
-//		var mounth = "";
-//		if (date.compareTo("01") == 0) mounth = "января";
-//		else if (date.compareTo("02") == 0) mounth = "февраля";
-//		else if (date.compareTo("03") == 0) mounth = "марта";
-//		else if (date.compareTo("04") == 0) mounth = "апреля";
-//		else if (date.compareTo("05") == 0) mounth = "мая";
-//		else if (date.compareTo("06") == 0) mounth = "июня";
-//		else if (date.compareTo("07") == 0) mounth = "июля";
-//		else if (date.compareTo("08") == 0) mounth = "августа";
-//		else if (date.compareTo("09") == 0) mounth = "сентября";
-//		else if (date.compareTo("10") == 0) mounth = "октября";
-//		else if (date.compareTo("11") == 0) mounth = "ноября";
-//		else mounth = "декабря";
-//		String day;
-//		if (answer.substring(0, 2).charAt(0) == '0')
-//			day = answer.substring(0,1);
-//		else day = answer.substring(0, 2);
-//		var result = day + " " + mounth;
-//		return result;
-//	}
-//	
-//	@Test
-//	public void testGetQuestion_one()
-//	{
-//		var result = testGetQuestion(1);
-//		assertTrue(result);
-//	}
-//	
-//	@Test
-//	public void testGetQuestion_two()
-//	{
-//		var result = testGetQuestion(2);
-//		assertTrue(result);
-//	}
-//	
-//	@Test
-//	public void testGetQuestion_three()
-//	{
-//		var result = testGetQuestion(3);
-//		assertTrue(result);
-//	}
-//	
-//	@Test
-//	public void testGetQuestion_four()
-//	{
-//		var result = testGetQuestion(4);
-//		assertTrue(result);
-//	}
-//	
-//	@Test
-//	public void testGetQuestion_five()
-//	{
-//		var result = testGetQuestion(5);
-//		assertTrue(result);
-//	}
-//	
-//	@Test
-//	public void testGetQuestion_six()
-//	{
-//		var result1 = testGetQuestion(2);
-//		var result2 = testGetQuestion(2);
-//		var result3 = testGetQuestion(2);
-//		var result4 = testGetQuestion(2);
-//		var result5 = testGetQuestion(2);
-//		var questions = questionsForId2.toArray();
-//		var result6 = questions[0] != questions[1] && questions[1] != questions[2] &&
-//				questions[2] != questions[3] && questions[3] != questions[4];
-//
-//		assertTrue(result1);
-//		assertTrue(result6);
-//	}
-//}
+package tests;
+
+import chatBot.TextGenerator;
+import static org.junit.Assert.*;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.regex.Pattern; 
+
+
+import org.junit.Test;
+
+public class TextGeneratorTest
+{
+	private TextGenerator tg = TextGenerator.INSTANCE;
+
+	@Test
+	public void testGetHelp()
+	{
+		var help = tg.getHelp();
+		assertEquals(help, "Привет! Мы тут задаём вопросы о знаменитостях. "
+				+ "Все даты записывай в формате ДД.ММ.ГГГГ, а имена в формате ИФ");
+	} 
+	
+	@Test
+	public void testGetQuestion()
+	{
+		var result = true;
+		try
+		{
+			for(var i = 0; i < 100; i ++)
+				result = result && testGetQuestionHelper();
+		}
+		catch(IOException IO)
+		{
+			assert false : "Нет подключение к сети Интернет";
+		}
+		catch(IllegalArgumentException ill)
+		{
+			assert false;
+		}
+		assertTrue(result);
+	}
+	
+	private boolean testGetQuestionHelper() throws IOException, IllegalArgumentException
+	{
+		var mediaWikiPage = "https://ru.wikipedia.org/w/api.php?format=xml&action=query&"
+				+ "prop=revisions&rvprop=content&titles=";
+		var answerQuestion = tg.getQuestion(0);
+		var question = answerQuestion.getQuestion();
+		var answer = answerQuestion.getAnswer();
+		if (question.contains("Премия"))
+		{
+			var result =  workWithAward(question, mediaWikiPage);
+			return result.equals(answer);
+		}
+		else if (question.contains("Когда родился(ась) "))
+		{
+			var result = workWithPerson(question, mediaWikiPage);
+			return result.equals(answer);
+		}
+		throw new IllegalArgumentException();
+	}
+	
+	private String workWithAward(String question, String mediaWikiPage) throws IOException, IllegalArgumentException
+	{
+		var award = question.split(" в ")[0].replaceAll("Кому была вручена ", "").replaceAll(" ", "_");
+		var year = question.split(" в ")[1].replaceAll(" году?", "");
+		year = year.substring(0, year.length() - 1);
+		var page = mediaWikiPage + award;
+		var url = new URL(page);
+		var reader = new LineNumberReader(new InputStreamReader(url.openStream(), "UTF-8"));
+		var line = reader.readLine();
+		var rex = Pattern.compile("\\[\\[[а-я А-Я]+? \\([кино]*?премия, " + year + "\\)(\\|)[0-9]+?-я[\\w\\W]*?\\]\\]");
+		while(line != null)
+		{
+			var match = rex.matcher(line);
+			if (match.find())
+			{
+				var newPattern = "\\[\\[([[А-Я а-яЁё] \\.’\\,\\(\\)\\|-]+?)\\]\\]";
+				var newRex = Pattern.compile(newPattern);
+				while (line!=null)
+				{	
+					var newMatch = newRex.matcher(line);
+					if (newMatch.find())
+					{
+						var index = newMatch.group(1).indexOf('|');
+						return newMatch.group(1).substring(index + 1);
+					}
+					line = reader.readLine();
+				}
+			}
+			line = reader.readLine();
+		}
+		throw new IllegalArgumentException();
+	}
+	
+	private String workWithPerson(String question, String mediaWikiPage) throws IOException, IllegalArgumentException
+	{
+		var person = question.substring(19);
+    	person = person.substring(0, person.length() - 1).replaceAll(" ", "_");
+		var page = mediaWikiPage + person;
+		var url = new URL(page);
+		var reader = new LineNumberReader(new InputStreamReader(url.openStream(), "UTF-8"));
+		var line = reader.readLine();
+		var rex = Pattern.compile("([0-9]{1,2})\\|([а-я]+?)\\|([0-9]{4})");
+		while(line != null)
+		{
+			var match = rex.matcher(line);
+			if (match.find())
+				return getFormat(match.group(1) + " " + match.group(2) + " " + match.group(3));
+			line = reader.readLine();
+		}
+		throw new IllegalArgumentException();
+	}
+	
+	private String getFormat(String information)
+	{
+		String[] text = information.split(" ");
+		String mounth = "";
+		if (text[1].compareTo("января") == 0) mounth = ".01.";
+		else if (text[1].compareTo("февраля") == 0) mounth = ".02.";
+		else if (text[1].compareTo("марта") == 0) mounth = ".03.";
+		else if (text[1].compareTo("апреля") == 0) mounth = ".04.";
+		else if (text[1].compareTo("мая") == 0) mounth = ".05.";
+		else if (text[1].compareTo("июня") == 0) mounth = ".06.";
+		else if (text[1].compareTo("июля") == 0) mounth = ".07.";
+		else if (text[1].compareTo("августа") == 0) mounth = ".08.";
+		else if (text[1].compareTo("сентября") == 0) mounth = ".09.";
+		else if (text[1].compareTo("октября") == 0) mounth = ".10.";
+		else if (text[1].compareTo("ноября") == 0) mounth = ".11.";
+		else mounth = ".12.";
+		if (text[0].length() == 1)
+			text[0] = "0" + text[0];
+		String formatedinformation = text[0] + mounth + text[2];
+		return formatedinformation;
+	}
+}

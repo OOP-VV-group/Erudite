@@ -63,18 +63,24 @@ public enum TextGenerator
 		switch(questionAbout)
 		{
 		case "awards":
-			return getQuestionAboutAwards(id);
+			var questionAward = getQuestionAboutAwards(id);
+			if (questionAward == null)
+				return getQuestion(id);
+			return questionAward;
 //		case "persons":
 //			return getQuestionAboutPersons(id);
 		default:
-			return getQuestionAboutPersons(id);
+			var questionPerson = getQuestionAboutPersons(id);
+			if (questionPerson == null)
+				return getQuestion(id);
+			return questionPerson;
 		}
 	}
 	
 	private QuestionAnswer getQuestionAboutAwards(int id) throws IOException
 	{
-		var pattern = "title=(\")(Премия[\\w\\W]+?)(\")";
-		var rex = Pattern.compile(pattern);
+		var patternAwards = "title=(\")(Премия[\\w\\W]+?)(\")";
+		var rex = Pattern.compile(patternAwards);
 		var whatQuestion = rnd.nextInt(awards.length);
 		var questionAbout = awards[whatQuestion];
 		var reader = getReader(true, questionAbout);
@@ -92,15 +98,15 @@ public enum TextGenerator
 			var questionsAnswers = foundQuestionsAnswers.get(currentAward);
 			var questionAnswer = questionsAnswers.get(rnd.nextInt(questionsAnswers.size()));
 			if (checkUsedQuestion(id, questionAnswer))
-				return getQuestionAboutPersons(id);
+				return null;
 			return questionAnswer;
 		}
 		var nameAwards = new String[listNameAwards.size()];
 		nameAwards = listNameAwards.toArray(nameAwards);
 		reader = getReader(false, currentAward);
 		line = reader.readLine();
-		pattern = "\\[\\[[а-я А-Я]+? \\([кино]*?премия, ([0-9]{4})\\)(\\|)[0-9]+?-я[\\w\\W]*?\\]\\]";
-		rex = Pattern.compile(pattern);
+		patternAwards = "\\[\\[[а-я А-Я]+? \\([кино]*?премия, ([0-9]{4})\\)(\\|)[0-9]+?-я[\\w\\W]*?\\]\\]";
+		rex = Pattern.compile(patternAwards);
 		var questionsAnswers = new ArrayList<QuestionAnswer>();
 		var nameCurrentAward = currentAward.replaceAll("_", " ");
 		while(line != null)
@@ -108,8 +114,8 @@ public enum TextGenerator
 			match = rex.matcher(line);
 			if (match.find())
 			{
-				var newPattern = "\\[\\[([[А-Я а-яЁё] \\.’\\,\\(\\)\\|-]+?)\\]\\]";
-				var newRex = Pattern.compile(newPattern);
+				var patternNamePerson = "\\[\\[([[А-Я а-яЁё] \\.’\\,\\(\\)\\|-]+?)\\]\\]";
+				var newRex = Pattern.compile(patternNamePerson);
 				while (line!=null)
 				{	
 					var newMatch = newRex.matcher(line);
@@ -230,31 +236,28 @@ public enum TextGenerator
 			var questionsAnswers = foundQuestionsAnswers.get(questionAbout);
 			var questionAnswer = questionsAnswers.get(rnd.nextInt(questionsAnswers.size()));
 			if (checkUsedQuestion(id, questionAnswer))
-				return getQuestionAboutPersons(id);
+				return null;
 			return questionAnswer;
 		}
-		else {System.out.println("Подождите, идёт загрузка информации...");}
 		var questionsAnswers = new ArrayList<QuestionAnswer>();
 		var reader = getReader(false, questionAbout);
 		var line = reader.readLine();
-		var pattern = Pattern.compile("([А-Яа-я]+?, [А-Я а-я]+?)\\|[А-Я а-я]*?\\]\\]");
+		var patternNamePerson = "([А-Яа-я]+?, [А-Я а-я]+?)\\|[А-Я а-я]*?\\]\\]";
+		var rex = Pattern.compile(patternNamePerson);
 		while(line != null)
 		{
-			var match = pattern.matcher(line);
+			var match = rex.matcher(line);
 			if (match.find())
 				{
 					var name = match.group(1).replaceAll(" ", "_");
 					String date;
-					try
-					{
-						date = getBirthDate(name);
-						date = getFormat(date);
-					}
-					catch(IllegalArgumentException ex) 
+					date = getBirthDate(name);
+					if (date == null)
 					{
 						line = reader.readLine();
 						continue;
 					}
+					date = getFormat(date);
 					questionsAnswers.add(new QuestionAnswer("Когда родился(ась) " + match.group(1) + "?", date));
 				}
 			line = reader.readLine();
@@ -262,12 +265,12 @@ public enum TextGenerator
 		foundQuestionsAnswers.put(questionAbout, questionsAnswers);
 		var questionAnswer = questionsAnswers.get(rnd.nextInt(questionsAnswers.size()));
 		if (checkUsedQuestion(id, questionAnswer))
-			return getQuestionAboutPersons(id);
+			return null;
 		
 		return questionAnswer;
 	}
 	
-	private String getBirthDate(String name) throws IOException, IllegalArgumentException
+	private String getBirthDate(String name) throws IOException
 	{
 		var personReader = getReader(false, name);
 		var personLine = personReader.readLine();
@@ -279,7 +282,7 @@ public enum TextGenerator
 				return personMatch.group(1) + " " + personMatch.group(2) + " " + personMatch.group(3);
 			personLine = personReader.readLine();
 		}
-		throw new IllegalArgumentException();
+		return null;
 		
 	}
 	

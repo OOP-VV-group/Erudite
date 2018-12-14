@@ -1,8 +1,7 @@
 package chatBot;
 
 public interface IOModule {
-	void openIO();
-	void closeIO();
+	void close();
 	int getId();
 	void sendBotMessages(String[] messages);
 	String[] collectUserMessages();

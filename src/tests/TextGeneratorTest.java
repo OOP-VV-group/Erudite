@@ -76,7 +76,7 @@ public class TextGeneratorTest
 		var result = true;
 		while(count < questionsAndAnswers.size())
 		{
-			try
+			try 
 			{
 				var questionAnswer = tg.getQuestion(0);
 				for(var question : questionsAndAnswers.keySet())

@@ -75,7 +75,7 @@ public enum TextGenerator
 				return getQuestion(id);
 			return questionPerson;
 		}
-	}
+	} 
 	
 	private QuestionAnswer getQuestionAboutAwards(int id) throws IOException
 	{

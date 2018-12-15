@@ -1,56 +1,45 @@
 package servers;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Scanner;
 
 import chatBot.Erudite;
-import chatBot.IOConsole;
-import chatBot.IOModule;
 
 public class ConsoleServer {
 	private static Erudite erudite = new Erudite();
 
 	public static void main(String[] args) throws IOException {
-		IOConsole.getInstance().open();
-		IOConsole.getInstance().sendBotMessages(
-				 ConsoleServer.erudite.getStartMessage());
+		Scanner console = new Scanner(System.in);
 		
+		System.out.println(ConsoleServer.erudite.getStartMessage());
 		while (true)
 			try {
-				IOConsole.getInstance().sendBotMessages(
-						new String[] { ConsoleServer.erudite.getQuestion(0) });
+				System.out.println(ConsoleServer.erudite.getQuestion(0));
 				
-				String[] result = ConsoleServer.erudite.checkAnswer(
-						0,
-						IOConsole.getInstance().collectUserMessages()[0]);
+				String result = ConsoleServer.erudite.checkAnswer(0, console.nextLine());
 				while (true)
-					if (result[0].equals("help")) {
-						IOConsole.getInstance().sendBotMessages(
-								new String[] {
-									"Мы тут задаём вопросы о знаменитостях. " + 
-									"Все даты записывай в формате ДД.ММ.ГГГГ, а имена в формате ИФ",
-									"Команды: ",
-									"    help - вывести справку",
-									"    quit - закончить сессию",
-									""});	
+					if (result.equals("help")) {
+						System.out.println(erudite.getHelpMessage());	
 						result = ConsoleServer.erudite.checkAnswer(
 								0,
-								IOConsole.getInstance().collectUserMessages()[0]);
+								console.nextLine());
 						continue;
 					} 
-					else if (result[0].equals("quit"))
+					else if (result.equals("quit"))
 						throw new IOException("User quited"); 
 					else
 						break;
-				IOConsole.getInstance().sendBotMessages(result);
+				System.out.println(result);
 			}
 			catch (IOException exceptionIO) {
+				console.close();
+
 				if (exceptionIO.getMessage().equals("User quited"))
 					break;
 				if (exceptionIO.getMessage().equals("While checking answer no asked question found"))
 					throw exceptionIO;
 			}
 		
-		IOConsole.getInstance().close();
+		console.close();
 	}
 }

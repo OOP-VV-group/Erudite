@@ -26,13 +26,13 @@ public class EruditeTest {
 		var erudite = new Erudite();
 		var question = TextGenerator.INSTANCE.getQuestion(0);
 		erudite.getQuestion(0, question);
-		assert erudite.checkAnswer(0, question.getAnswer())[0].startsWith("Правильный ответ");
+		assert erudite.checkAnswer(0, question.getAnswer()).startsWith("Правильный ответ");
 	}
 	
 	@Test
 	public void IncorrectAnswer() throws IOException {
 		var erudite = new Erudite();
 		erudite.getQuestion(0);
-		assert erudite.checkAnswer(0, "123")[0].startsWith("Неправильный ответ");
+		assert erudite.checkAnswer(0, "123").startsWith("Неправильный ответ");
 	}
 }

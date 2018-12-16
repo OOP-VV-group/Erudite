@@ -9,11 +9,13 @@ import org.junit.Test;
 
 public class EruditeTest { 
 	@Test
-	public void questionClosable() throws IOException {
+	public void questionClosable() throws IOException 
+	{
 		var erudite = new Erudite();
 		erudite.getQuestion(0);
 		erudite.checkAnswer(0, "");
-		try {
+		try 
+		{
 			erudite.checkAnswer(0, "");
 		}
 		catch (IOException exceptionIO) {
@@ -22,7 +24,8 @@ public class EruditeTest {
 	}
 	
 	@Test
-	public void CorrectAnswer() throws IOException {
+	public void CorrectAnswer() throws IOException 
+	{
 		var erudite = new Erudite();
 		var question = TextGenerator.INSTANCE.getQuestion(0);
 		erudite.getQuestion(0, question);
@@ -30,7 +33,8 @@ public class EruditeTest {
 	}
 	
 	@Test
-	public void IncorrectAnswer() throws IOException {
+	public void IncorrectAnswer() throws IOException 
+	{
 		var erudite = new Erudite();
 		erudite.getQuestion(0);
 		assert erudite.checkAnswer(0, "123").startsWith("Неправильный ответ");

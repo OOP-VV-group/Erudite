@@ -8,12 +8,14 @@ import chatBot.Erudite;
 public class ConsoleServer {
 	private static Erudite erudite = new Erudite();
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException 
+	{	
 		Scanner console = new Scanner(System.in);
 		
 		System.out.println(ConsoleServer.erudite.getStartMessage());
 		while (true)
-			try {
+			try 
+			{
 				System.out.println(ConsoleServer.erudite.getQuestion(0));
 				
 				String result = ConsoleServer.erudite.checkAnswer(0, console.nextLine());
@@ -31,7 +33,8 @@ public class ConsoleServer {
 						break;
 				System.out.println(result);
 			}
-			catch (IOException exceptionIO) {
+			catch (IOException exceptionIO) 
+			{
 				console.close();
 
 				if (exceptionIO.getMessage().equals("User quited"))

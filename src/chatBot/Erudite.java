@@ -13,27 +13,29 @@ public class Erudite {
 	private HashMap<Integer, QuestionAnswer> askedQuestions =
 		new HashMap<Integer, QuestionAnswer>();
 	private TextGenerator textGenerator = TextGenerator.INSTANCE;
+	private String startMessage = 
+		this.textGenerator.getHelp() + "\n" + 
+		"Команды: \n" +
+		"    help - вывести справку\n" +
+		"    quit - закончить сессию\n";
+	private String helpMessage = 
+		"Мы тут задаём вопросы о знаменитостях. " + 
+		"Все даты записывай в формате ДД.ММ.ГГГГ, а имена в формате ИФ\n" +
+		"Команды: \n" +
+		"    help - вывести справку\n" +
+		"    quit - закончить сессию\n";
 	
-	public String getStartMessage() {
-		return this.textGenerator.getHelp() + "\n" + 
-				"Команды: \n" +
-				"    help - вывести справку\n" +
-				"    quit - закончить сессию\n";
-	}
+	public String getStartMessage() { return startMessage; }
 	
-	public String getHelpMessage() {
-		return "Мы тут задаём вопросы о знаменитостях. " + 
-				"Все даты записывай в формате ДД.ММ.ГГГГ, а имена в формате ИФ\n" +
-				"Команды: \n" +
-				"    help - вывести справку\n" +
-				"    quit - закончить сессию\n"; 
-	}
+	public String getHelpMessage() { return helpMessage; }
 	
-	public String getQuestion(int id) throws IOException {
+	public String getQuestion(int id) throws IOException 
+	{
 		return this.getQuestion(id, null);
 	}
 	
-	public String getQuestion(int id, QuestionAnswer question) throws IOException {
+	public String getQuestion(int id, QuestionAnswer question) throws IOException 
+	{
 		if (question == null)
 			question = this.textGenerator.getQuestion(id);
 		
@@ -44,13 +46,8 @@ public class Erudite {
 		return question.getQuestion();
 	}
 	
-	public boolean questionAsked(int id) {
-		if (this.askedQuestions.containsKey(id))
-			return true;
-		return false;
-	}
-	
-	public String checkAnswer(int id, String answer) throws IOException {
+	public String checkAnswer(int id, String answer) throws IOException 
+	{
 		if (COMMANDS.contains(answer))
 			return answer;
 		
@@ -61,11 +58,30 @@ public class Erudite {
 		this.askedQuestions.remove(id);
 		if (trueAnswer.equals(answer))
 			return "Правильный ответ!\n";
-		return "Неправильный ответ. Правильный ответ: " + trueAnswer + "\n";
+		return Erudite.stringsConcat(new String[] {
+			"Неправильный ответ. Правильный ответ: ",
+			trueAnswer,
+			"\n"});
 	}
 	
-	public void closeIO(int id) {
-		if (this.askedQuestions.containsKey(id))
+	public void closeIO(int id) 
+	{
+		if (this.questionAsked(id))
 			this.askedQuestions.remove(id);
+	}
+	
+	public static String stringsConcat(String[] strings)
+	{
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < strings.length; i++)
+			result.append(strings[i]);
+		return result.toString();
+	}
+	
+	private boolean questionAsked(int id) 
+	{
+		if (this.askedQuestions.containsKey(id))
+			return true;
+		return false;
 	}
 }

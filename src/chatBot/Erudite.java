@@ -64,7 +64,7 @@ public class Erudite {
 			"\n"});
 	}
 	
-	public void closeIO(int id) 
+	public void removeUser(int id) 
 	{
 		if (this.questionAsked(id))
 			this.askedQuestions.remove(id);
@@ -78,7 +78,7 @@ public class Erudite {
 		return result.toString();
 	}
 	
-	private boolean questionAsked(int id) 
+	public boolean questionAsked(int id) 
 	{
 		if (this.askedQuestions.containsKey(id))
 			return true;

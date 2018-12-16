@@ -24,10 +24,13 @@ public class Erudite {
 		"Команды: \n" +
 		"    help - вывести справку\n" +
 		"    quit - закончить сессию\n";
+	private String quitMessage = "Спасибо за ответы!";
 	
 	public String getStartMessage() { return startMessage; }
 	
 	public String getHelpMessage() { return helpMessage; }
+	
+	public String getQuitMessage() { return quitMessage; }
 	
 	public String getQuestion(int id) throws IOException 
 	{

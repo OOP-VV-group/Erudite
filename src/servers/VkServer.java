@@ -91,7 +91,7 @@ public class VkServer
 	        for (JsonValue update : updates)
 	        {
 	        	JsonObject updateObj = Json.createReader(new StringReader(update.toString())).readObject();
-	        	 
+	        	
 	        	if (updateObj.getString("type").equals("message_new"))
 	        	{
 	        		int userId = updateObj.getJsonObject("object").getInt("user_id");

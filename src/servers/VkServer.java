@@ -26,119 +26,80 @@ import chatBot.Erudite;
 
 public class VkServer 
 {
-	private static String requestKey;
-	private static String requestServer;
-	private static String EXIT_SEQUENCE = "SERVER_EXIT";
-	private static HashMap<Integer, String> userMessage = new HashMap<Integer, String>();
-	private static Random random = new Random(); 
-	private static Erudite erudite = new Erudite();
+	private static Random random = new Random();
+	private static String EXIT_SEQUENCE = "SERVER_EXIT"; 
+	private String requestKey;
+	private String requestServer;
+	private HashMap<Integer, String> userMessage = new HashMap<Integer, String>();
+	private Erudite erudite = new Erudite();
 	
 	public static void main(String[] args)
-			throws MalformedURLException, IOException, URISyntaxException 
-	{		
-		URL getLongPollServerUrl = new URL(Erudite.stringsConcat(new String[] {
-			"https://api.vk.com/method/",
-			"groups.getLongPollServer?",
-			"group_id=175288971&",
-			"access_token=097e0d17214a1f95a90b7a4cfbaf44b64093e3ce1a6b997d5b043dd13828b",
-				"9fdf7ca2a0606e188c8daf85&",
-			"v=5.92"}));
-        HttpsURLConnection getServerConnection = 
-        	(HttpsURLConnection)getLongPollServerUrl.openConnection();
-        BufferedReader getServerBufferedReader = new BufferedReader(
-        	new InputStreamReader(getServerConnection.getInputStream()));
-        
-        JsonReader jsonReader = Json.createReader(getServerBufferedReader);
-        JsonObject getServerJsonObj = jsonReader.readObject();
+			throws MalformedURLException, IOException 
+	{
+		VkServer vkServer = new VkServer();
+		
+        JsonReader getServerJR = vkServer.createJsonReaderForHttpsRequest(
+        	Erudite.stringsConcat(new String[] {
+    			"https://api.vk.com/method/",
+    			"groups.getLongPollServer?",
+    			"group_id=175288971&",
+    			"access_token=097e0d17214a1f95a90b7a4cfbaf44b64093e3ce1a6b997d5b043dd13828b",
+    				"9fdf7ca2a0606e188c8daf85&",
+    			"v=5.92"}));
+        JsonObject getServerJsonObj = getServerJR.readObject();
         if (getServerJsonObj.containsKey("error"))
         	throw new RuntimeException(getServerJsonObj.toString());
         getServerJsonObj = getServerJsonObj.getJsonObject("response");
+        getServerJR.close();
         
-        VkServer.requestKey = getServerJsonObj.getString("key");
-        VkServer.requestServer = getServerJsonObj.getString("server");
+        vkServer.requestKey = getServerJsonObj.getString("key");
+        vkServer.requestServer = getServerJsonObj.getString("server");
         String requestTs = Files.readAllLines(
         	Paths.get(System.getProperty("user.dir") + "\\src\\servers\\server_data"),
         	StandardCharsets.UTF_8).get(0).substring(8);
         
-        main:
         while (true)
         {
-        	if (System.in.available() > 0)
-        	{
-        		BufferedReader consoleBR = new BufferedReader(new InputStreamReader(System.in));
-        		while (System.in.available() > 0)
-        		{
-	        		String consoleMessage = consoleBR.readLine().toString();
-	        		if (consoleMessage.equals(EXIT_SEQUENCE))
-	        			break main;
-        		}
-        	}
-        		
-	        URL requestUrl = VkServer.makeRequestUrl(requestTs);
-	        HttpsURLConnection requestConn = 
-	        		(HttpsURLConnection)requestUrl.openConnection();
-	        BufferedReader requestBR = new BufferedReader(new InputStreamReader(
-	        	requestConn.getInputStream()));
-	        
-	        jsonReader = Json.createReader(requestBR);
-	        JsonObject requestJO = jsonReader.readObject();
+        	if (VkServer.exitSequencePresented())
+        		break;
+        	
+	        JsonReader requestJR = vkServer.createJsonReaderForHttpsRequest(
+	        	vkServer.makeRequestUrlString(requestTs));
+	        JsonObject requestJO = requestJR.readObject();
 	        if (requestJO.containsKey("failed"))
 	        	throw new RuntimeException(requestJO.toString());
 	        requestTs = requestJO.getString("ts");
+	        requestJR.close();
 	        
-	        JsonArray updates = requestJO.getJsonArray("updates");
-	        HashMap<Integer, String> repliedUsers = new HashMap<Integer, String>();
-	        for (JsonValue update : updates)
-	        {
-	        	JsonObject updateObj = Json.createReader(new StringReader(update.toString())).readObject();
-	        	
-	        	if (updateObj.getString("type").equals("message_new"))
-	        	{
-	        		int userId = updateObj.getJsonObject("object").getInt("user_id");
-	        		String message = updateObj.getJsonObject("object").getString("body");
-	        		repliedUsers.put(userId, message);
-	        	}
-	        }
+	        HashMap<Integer, String> repliedUsers = VkServer.getRepliedUsersFromUpdates(
+	        	requestJO.getJsonArray("updates"));
 	        
 	        for (int userId : repliedUsers.keySet())
 	        {
-	        	String botMessage = new String();
-	        	if (!VkServer.userMessage.containsKey(userId))
-	        		botMessage = Erudite.stringsConcat(new String[] {
-	        			VkServer.erudite.getStartMessage(),
-	        			VkServer.erudite.getQuestion(userId)});
-	        	else
+	        	String botMessage;
+	        	try
 	        	{
-	        		String result = VkServer.erudite.checkAnswer(userId, repliedUsers.get(userId));
-	        		if (result.equals("help"))
-	        			botMessage = VkServer.erudite.getHelpMessage();
-	        		else if (result.equals("quit"))
-	        		{
-	        			VkServer.removeUser(userId);
+	        		botMessage = vkServer.initiateEruditeLogic(userId, repliedUsers);
+	        	}
+	        	catch (IOException catchedException)
+	        	{
+	        		if (catchedException.getMessage().equals("User quited"))
 	        			continue;
-	        		}
-	        		else
-	        			botMessage = Erudite.stringsConcat(new String[] {
-	        				result,
-	        				VkServer.erudite.getQuestion(userId)});
-	        	}	
-	        	VkServer.userMessage.put(userId, repliedUsers.get(userId));
+	        		throw catchedException;
+	        	}
+	        	vkServer.userMessage.put(userId, repliedUsers.get(userId));
 	        	
-	        	URL botMessageUrl = VkServer.makeBotMessageUrl(
-	        		userId, 
-	        		URLEncoder.encode(botMessage, "UTF-8"));
-		        HttpsURLConnection botMessageConn = 
-	        		(HttpsURLConnection)botMessageUrl.openConnection();
-		        BufferedReader botMessageBR = new BufferedReader(new InputStreamReader(
-		        	botMessageConn.getInputStream()));
-		        
-		        jsonReader = Json.createReader(botMessageBR);
-		        JsonObject botMessageJO = jsonReader.readObject();
+		        JsonReader botMessageJR = vkServer.createJsonReaderForHttpsRequest(
+		        	VkServer.makeBotMessageUrl(
+		        		userId, 
+		        		URLEncoder.encode(botMessage, "UTF-8")));
+		        JsonObject botMessageJO = botMessageJR.readObject();
 		        if (botMessageJO.containsKey("error"))
 		        {
 		        	System.out.println(botMessageJO.toString());
-		        	VkServer.removeUser(userId);
+		        	vkServer.removeUser(userId);
 		        }
+		        botMessageJR.close();
 	        }
         }
         
@@ -146,39 +107,108 @@ public class VkServer
         	Paths.get(System.getProperty("user.dir") + "\\src\\servers\\server_data"), 
         	("last_ts=" + requestTs).getBytes(),
         	StandardOpenOption.WRITE);
-        getServerBufferedReader.close();
 	}
 	
-	private static void removeUser(int userId)
+	private static String makeBotMessageUrl(int userId, String message) 
+			throws MalformedURLException
 	{
-		if (VkServer.userMessage.containsKey(userId))
-			VkServer.userMessage.remove(userId);
-		VkServer.erudite.removeUser(userId);
-	}
-	
-	private static URL makeBotMessageUrl(int userId, String message) throws MalformedURLException
-	{
-		return new URL(Erudite.stringsConcat(new String[] {
+		return Erudite.stringsConcat(new String[] {
 			"https://api.vk.com/method/",
 			"messages.send?",
 			"user_id=", Integer.toString(userId), "&",
-			"random_id=", Integer.toString(random.nextInt(1000000)), "&",
+			"random_id=", Integer.toString(VkServer.random.nextInt(1000000)), "&",
 			"message=", message, "&",
 			"access_token=097e0d17214a1f95a90b7a4cfbaf44b64093e3ce1a6b997d5b043dd13828b",
 				"9fdf7ca2a0606e188c8daf85&",
-			"v=5.92"}));
+			"v=5.92"});
 	}
 	
-	private static URL makeRequestUrl(String requestTs) throws MalformedURLException 
+	private static boolean exitSequencePresented() throws IOException
 	{
-		if (VkServer.requestKey == null || VkServer.requestServer == null)
+		if (System.in.available() > 0)
+    	{
+    		BufferedReader consoleBR = new BufferedReader(new InputStreamReader(System.in));
+    		while (System.in.available() > 0)
+    		{
+        		String consoleMessage = consoleBR.readLine().toString();
+        		if (consoleMessage.equals(EXIT_SEQUENCE))
+        			return true;
+    		}
+    	}
+		return false;
+	}
+	
+	private static HashMap<Integer, String> getRepliedUsersFromUpdates(JsonArray updates)
+	{
+		HashMap<Integer, String> repliedUsers = new HashMap<Integer, String>();
+        for (JsonValue update : updates) 
+        {
+        	JsonObject updateObj = Json.createReader(new StringReader(update.toString())).readObject();
+        	
+        	if (updateObj.getString("type").equals("message_new"))
+        		repliedUsers.put(
+        			updateObj.getJsonObject("object").getInt("user_id"), 
+        			updateObj.getJsonObject("object").getString("body"));
+        }
+        
+        return repliedUsers;
+	}
+	
+	private String initiateEruditeLogic(int userId, HashMap<Integer, String> repliedUsers) throws IOException
+	{
+		String botMessage = new String();
+		if (!this.userMessage.containsKey(userId))
+    		botMessage = Erudite.stringsConcat(new String[] {
+    			this.erudite.getStartMessage(),
+    			this.erudite.getQuestion(userId)});
+    	else
+    	{
+    		String result = this.erudite.checkAnswer(userId, repliedUsers.get(userId));
+    		if (result.equals("help"))
+    			botMessage = this.erudite.getHelpMessage();
+    		else if (result.equals("quit"))
+    		{
+    			this.removeUser(userId);
+    			throw new IOException("User quited");
+    		}
+    		else
+    			botMessage = Erudite.stringsConcat(new String[] {
+    				result,
+    				this.erudite.getQuestion(userId)});
+    	}
+		
+		return botMessage;
+	}
+	
+	private void removeUser(int userId)
+	{
+		if (this.userMessage.containsKey(userId))
+			this.userMessage.remove(userId);
+		this.erudite.removeUser(userId);
+	}
+	
+	private JsonReader createJsonReaderForHttpsRequest(String requestUrlString) 
+			throws IOException
+	{
+		URL requestUrl = new URL(requestUrlString);
+        HttpsURLConnection requestConn = 
+        	(HttpsURLConnection)requestUrl.openConnection();
+        BufferedReader requestBR = new BufferedReader(
+        	new InputStreamReader(requestConn.getInputStream()));
+        
+        return Json.createReader(requestBR);
+	}
+	
+	private String makeRequestUrlString(String requestTs) throws MalformedURLException 
+	{
+		if (this.requestKey == null || this.requestServer == null)
 			throw new NullPointerException("Request's server or key is/are not initialized");
 		
-		return new URL(Erudite.stringsConcat(new String[] {
-			VkServer.requestServer, "?", 
+		return Erudite.stringsConcat(new String[] {
+			this.requestServer, "?", 
 			"act=a_check&",
-			"key=", VkServer.requestKey, "&", 
+			"key=", this.requestKey, "&", 
 			"ts=", requestTs, "&", 
-			"wait=25"}));
+			"wait=25"});
 	}
 }

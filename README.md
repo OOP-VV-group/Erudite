@@ -1,2 +1,3 @@
 # Erudite
-Vkontakte chatbot, that asks tricky (too tricky, actually) questions
+Vkontakte chatbot, that asks difficult (too difficult, actually) questions
+
